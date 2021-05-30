@@ -132,18 +132,32 @@ class StockistToTerminalController extends Controller
     public function resetPasswordByTerminal(request $request){
         $requestedData = (object)($request->json()->all());
         $id = $requestedData->terminalId;
+        $old_password = $requestedData->old_password;
         $user_password = $requestedData->userPassword;
-        try
-        {
-            $terminalObj = new Person();
-            Person::where('id','=',$id)->update(['user_password'=> $user_password]);
-            DB::commit();
+
+        $data = Person::select()->where('id',$id)->where('user_password',$old_password)->first();
+        if($data){
+//            $data = Person::find($id);
+            $data->user_password = $user_password;
+            $data->save();
+            return response()->json(array('success' => 1, 'message' => 'Password reset successfully'),200);
+//            return response()->json(array('success' => $data, 'message' => 'Password reset successfully'),200);
         }
-        catch (Exception $e)
-        {
-            DB::rollBack();
-            return response()->json(array('success' => 0, 'message' => $e->getMessage().'<br>File:-'.$e->getFile().'<br>Line:-'.$e->getLine()),401);
+        else{
+            return response()->json(array('success' => 0, 'message' => 'Old Password did not matched'),200);
         }
+
+//        try
+//        {
+//            $terminalObj = new Person();
+//            Person::where('id','=',$id)->update(['user_password'=> $user_password]);
+//            DB::commit();
+//        }
+//        catch (Exception $e)
+//        {
+//            DB::rollBack();
+//            return response()->json(array('success' => 0, 'message' => $e->getMessage().'<br>File:-'.$e->getFile().'<br>Line:-'.$e->getLine()),401);
+//        }
         return response()->json(array('success' => 1, 'message' => 'Password reset successfully'),200);
     }
 }
