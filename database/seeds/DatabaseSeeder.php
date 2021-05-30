@@ -25,23 +25,23 @@ class DatabaseSeeder extends Seeder
 
 
         //people
-        Person::create(['people_unique_id'=>'C-001-ad','people_name'=>'Sachin Tendulkar','person_category_id'=>1,'user_id'=>'coder','user_password'=>'12345']);
-        Person::create(['people_unique_id'=>'T-0001-1920','people_name'=>'test terminal','person_category_id'=>3,'user_id'=>'terminal','user_password'=>'12345']);
+        Person::create(['id'=>1,'people_unique_id'=>'C-001-ad','people_name'=>'Sachin Tendulkar','person_category_id'=>1,'user_id'=>'coder','user_password'=>'12345','default_password'=>'12345']);
+        Person::create(['id'=>2,'people_unique_id'=>'C-002-ad','people_name'=>'Sourav Ganguly','person_category_id'=>1,'user_id'=>'adlucky','user_password'=>'998877','default_password'=>'12345']);
 
         // game
-        Game::create(['game_name'=>'2D']);
+        Game::create(['game_name'=>'lucky7']);
 
         // play series
-        PlaySeries::create(['series_name'=>'AP Gold','game_initial' => 'AP' ,'mrp'=> 11, 'winning_price'=>100, 'commision'=>5, 'payout'=>150,'default_payout'=>150]);
-        PlaySeries::create(['series_name'=>'GOA Jackpot','game_initial' => 'JP', 'mrp'=> 11, 'winning_price'=>100, 'commision'=>5, 'payout'=>150,'default_payout'=>150]);
-        PlaySeries::create(['series_name'=>'AP Gold','game_initial' => '7S', 'mrp'=> 11, 'winning_price'=>100, 'commision'=>5, 'payout'=>150,'default_payout'=>150]);
+        PlaySeries::create(['series_name'=>'7 DOWN','game_initial' => '7D' ,'mrp'=> 1, 'winning_price'=>2, 'commision'=>0, 'payout'=>500,'default_payout'=>150]);
+        PlaySeries::create(['series_name'=>'LUCKY 7','game_initial' => 'L7', 'mrp'=> 1, 'winning_price'=>5, 'commision'=>0, 'payout'=>500,'default_payout'=>150]);
+        PlaySeries::create(['series_name'=>'7 UP','game_initial' => '7U', 'mrp'=> 1, 'winning_price'=>2, 'commision'=>0, 'payout'=>500,'default_payout'=>150]);
 
         // stockist
-        Stockist::create(['stockist_unique_id'=>'ST-0001','stockist_name' => 'test stockist' ,'login_id'=> 1001, 'login_password'=>12345, 'serial_number'=>1, 'current_balance'=>1000,'person_category_id'=>4]);
+        Stockist::create(['stockist_unique_id'=>'ST-0001','stockist_name' => 'Main stockist' ,'user_id'=> 'ST0001', 'user_password'=>'ST0001', 'serial_number'=>1, 'current_balance'=>200000,'person_category_id'=>4]);
 
 
         // stockist_to_terminal
-        StockistToTerminal::create(['stockist_id'=>1,'terminal_id' => 2 ,'current_balance'=> 100, 'inforce'=>1]);
+//        StockistToTerminal::create(['stockist_id'=>1,'terminal_id' => 2 ,'current_balance'=> 100, 'inforce'=>1]);
 
     }
 }
