@@ -101,12 +101,14 @@ class PersonController extends Controller
         $userId = $user_data->userId;
         $userPsw = $user_data->psw;
 
-        $updateInfo = Person::where('id',$userId)->update(['user_password'=>$userPsw]);
+        $updateInfo = Person::where('id',$userId)
+            ->where('user_password', $user_data->old_psw)
+            ->update(['user_password'=>$userPsw]);
 
         if($updateInfo==1){
             return response()->json(array('success' => 1, 'message' => 'Successfully recorded'),200);
         }else{
-            return response()->json(array('success' => 0, 'message' => 'Something went wrong'),401);
+            return response()->json(array('success' => 0, 'message' => 'Something went wrong'),200);
         }
 
     }
