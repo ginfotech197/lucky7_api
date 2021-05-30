@@ -18,8 +18,6 @@ class CreateNextGameDrawsTable extends Migration
             $table->bigIncrements('id');
             $table->integer('next_draw_id')->unique()->nullable(false);
             $table->integer('last_draw_id')->unique()->nullable(false);
-
-
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

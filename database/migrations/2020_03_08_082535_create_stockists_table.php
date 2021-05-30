@@ -22,11 +22,13 @@ class CreateStockistsTable extends Migration
             $table->string('user_password','255');
             $table->integer('serial_number');
             $table->double('current_balance')->default(0);
+            $table->double('commission')->default(0);
 
             $table->bigInteger('person_category_id')->unsigned();
             $table ->foreign('person_category_id')->references('id')->on('person_categories');
-
+            $table->tinyInteger('is_loggedin')->default(0);
             $table->tinyInteger('inforce')->default(1);
+            $table->string('uuid',255)->nullable(true);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

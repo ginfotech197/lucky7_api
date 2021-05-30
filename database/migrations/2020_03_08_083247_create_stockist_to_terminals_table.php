@@ -23,6 +23,7 @@ class CreateStockistToTerminalsTable extends Migration
             $table ->foreign('terminal_id')->references('id')->on('people');
 
             $table->double('current_balance')->default(0);
+            $table->double('commission')->default(0);
 
             $table->tinyInteger('inforce')->default(1);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));

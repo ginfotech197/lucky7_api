@@ -31,6 +31,8 @@ class CreatePeopleTable extends Migration
             $table->bigInteger('person_category_id')->unsigned();
             $table ->foreign('person_category_id')->references('id')->on('person_categories');
 
+            $table->tinyInteger('is_loggedin')->default(0);
+
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

@@ -28,6 +28,8 @@ class CreatePlayMastersTable extends Migration
             $table->bigInteger('draw_master_id')->unsigned()->nullable(false);
             $table ->foreign('draw_master_id')->references('id')->on('draw_masters');
 
+            $table->double('terminal_commission')->default(0);
+            $table->double('stockist_commission')->default(0);
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
