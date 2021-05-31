@@ -27,6 +27,6 @@ class CreateResultPayoutsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('result_payouts');
+        Schema::dropIfExists('result_payout');
     }
 }
