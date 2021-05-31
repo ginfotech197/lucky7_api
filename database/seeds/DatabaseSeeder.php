@@ -8,6 +8,7 @@ use App\Model\PlaySeries;
 use App\Model\Stockist;
 use App\Model\StockistToTerminal;
 use App\Model\NextGameDraw;
+Use App\Model\ResultPayout;
 
 class DatabaseSeeder extends Seeder
 {
@@ -46,6 +47,9 @@ class DatabaseSeeder extends Seeder
 
         // next_game_draws
         NextGameDraw::create(['next_draw_id'=>2,'last_draw_id'=>1]);
+
+        //result_payout
+//        ResultPayout::create(['id'=>2, 'payout_status'=>'low']);
 
     }
 }
