@@ -7,6 +7,7 @@ use App\Model\Game;
 use App\Model\PlaySeries;
 use App\Model\Stockist;
 use App\Model\StockistToTerminal;
+use App\Model\NextGameDraw;
 
 class DatabaseSeeder extends Seeder
 {
@@ -42,6 +43,9 @@ class DatabaseSeeder extends Seeder
 
         // stockist_to_terminal
 //        StockistToTerminal::create(['stockist_id'=>1,'terminal_id' => 2 ,'current_balance'=> 100, 'inforce'=>1]);
+
+        // next_game_draws
+        NextGameDraw::create(['next_draw_id'=>2,'last_draw_id'=>1]);
 
     }
 }
