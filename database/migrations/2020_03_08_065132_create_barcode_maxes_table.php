@@ -22,8 +22,8 @@ class CreateBarcodeMaxesTable extends Migration
             $table->string('suffix',10)->nullable(true);
             $table->smallInteger('financial_year');
 
-            $table->bigInteger('person_category_id')->unsigned();
-            $table ->foreign('person_category_id')->references('id')->on('person_categories');
+//            $table->bigInteger('person_category_id')->unsigned();
+//            $table ->foreign('person_category_id')->references('id')->on('person_categories');
 
 //            $table->unique(['subject_name']);
 
