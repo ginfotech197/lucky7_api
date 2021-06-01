@@ -48,7 +48,7 @@ class PlaySeriesController extends Controller
             if(play_details.play_series_id=3, play_details.input_value*2,0)))) )as value from play_masters
             inner join play_details on play_details.play_master_id = play_masters.id
             inner join play_series on play_series.id = play_details.play_series_id
-            where time(play_masters.created_at)>= '19:15:00' and time(play_masters.created_at) <= '19:30:00'
+            where time(play_masters.created_at)>= ? or time(play_masters.created_at) <= ?
             group by play_series.id, play_series.series_name, play_series.game_initial, play_series.mrp",[$drawTime->start_time, $drawTime->end_time]);
 
         return response()->json(array('success' => 1, 'playSeries' => $allPlaySeries),200);

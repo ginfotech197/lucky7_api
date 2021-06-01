@@ -17,8 +17,8 @@ class CreateResultMastersTable extends Migration
         Schema::create('result_masters', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->date('game_date');
-            $table->integer('single_result');
-            $table->integer('jumble_number');
+//            $table->integer('single_result');
+//            $table->integer('jumble_number');
 
             $table->bigInteger('play_series_id')->unsigned();
             $table ->foreign('play_series_id')->references('id')->on('play_series');
