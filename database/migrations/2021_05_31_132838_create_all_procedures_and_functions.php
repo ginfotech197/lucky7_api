@@ -511,26 +511,27 @@ class CreateAllProceduresAndFunctions extends Migration
             END ;
         ');
 
-        DB::unprepared('DROP PROCEDURE IF EXISTS transaction_report_by_terminal;
-            CREATE PROCEDURE `transaction_report_by_terminal`(IN `term_id` VARCHAR(100), IN `start_date` DATE, IN `end_date` DATE)
-            BEGIN
-            select * from (SELECT \'\' as activity_time,1 as `type`,\'opening point\' as \'transaction_type\',\'\' as barcode_number,get_opening_balance(start_date,term_id) as total
-            UNION
-            select created_at as activity_time,2 as `type`,\'Ticket sale\' as transaction_type,barcode_number, sum(total) as total FROM(SELECT play_masters.created_at,barcode_number,play_details.play_series_id,play_details.input_value,play_series.mrp,play_details.input_value*play_series.mrp as total
-            FROM `play_masters`
-            inner join play_details on play_masters.id=play_details.play_master_id
-            inner join play_series on play_details.play_series_id=play_series.id
-            where play_masters.terminal_id=term_id and date(play_masters.created_at) between start_date and end_date
-            order by play_masters.barcode_number,play_masters.created_at) as table1 group by barcode_number
-            UNION
-            SELECT updated_at as activity_time,3 as `type`,\'Winning amount updated\' as transaction_type,barcode_number,get_prize_value_of_barcode(barcode_number)as total
-            FROM `play_masters`
-            where play_masters.terminal_id=term_id and date(play_masters.updated_at) between start_date and end_date
-            UNION
-            SELECT created_at as activity_time,4 as `type`,\'Points limit updated\' as transaction_type,\'\' as barcode_number,amount FROM `recharge_to_terminals`
-            WHERE terminal_id=term_id and date(created_at) between start_date and end_date) as transaction_table
-            order by date(activity_time),barcode_number,type ASC;
-            END ;
+        DB::unprepared('DROP PROCEDURE IF EXISTS gamepane_lucky7_db.transaction_report_by_terminal;
+                CREATE PROCEDURE gamepane_lucky7_db.`transaction_report_by_terminal`(IN `term_id` VARCHAR(100), IN `start_date` DATE, IN `end_date` DATE)
+                BEGIN
+                            select * from (SELECT \'\' as activity_time,1 as `type`,\'opening point\' as \'transaction_type\',\'\' as barcode_number,get_opening_balance(start_date,term_id) as total
+                UNION
+                select created_at as activity_time,2 as `type`,\'Ticket sale\' as transaction_type,barcode_number, sum(total) as total FROM(SELECT play_masters.created_at,barcode_number,play_details.play_series_id,play_details.input_value,play_series.mrp,play_details.input_value*play_series.mrp as total
+                FROM `play_masters`
+                inner join play_details on play_masters.id=play_details.play_master_id
+                inner join play_series on play_details.play_series_id=play_series.id
+                where play_masters.terminal_id=term_id and date(play_masters.created_at) between start_date and end_date
+                order by play_masters.barcode_number,play_masters.created_at) as table1 group by barcode_number,created_at
+                UNION
+                SELECT updated_at as activity_time,3 as `type`,\'Winning amount updated\' as transaction_type,barcode_number,get_prize_value_of_barcode(barcode_number)as total
+                FROM `play_masters`
+                where play_masters.terminal_id=term_id and date(play_masters.updated_at) between start_date and end_date
+                UNION
+                SELECT created_at as activity_time,4 as `type`,\'Points limit updated\' as transaction_type,\'\' as barcode_number,amount FROM `recharge_to_terminals`
+                WHERE terminal_id=term_id and date(created_at) between start_date and end_date) as transaction_table
+                order by date(activity_time),barcode_number,type ASC;
+                END ;;
+
         ');
 
 
