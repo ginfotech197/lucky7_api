@@ -30,6 +30,9 @@ Route::group(array('prefix' => 'v1'), function() {
     Route::get('/getAllDrawTimes','DrawMasterController@getAllDrawTimes');
     Route::get('/getMessage','GameMessageController@getSiteNotification');
     Route::post('/generateNewResultAndDraw','CentralFunctionController@createNewResult');
+    //testing
+    Route::post('/newTest1','CentralFunctionController@newTest1');
+
     Route::get('/getNextDrawNumber','NextGameDrawController@getIncreasedValue');
     Route::get('/getPreviousResult','ResultDetailsController@getPreviousDrawResult');
     Route::get('/getLimitedResultsForDisplay','ResultDetailsController@getLimitedResultByDate');

@@ -18,73 +18,74 @@ class CentralFunctionController extends Controller
     function createNewResult(){
 
         DB::beginTransaction();
-            try
-            {
-               $nextGameDrawData = NextGameDraw::first();
-               $nextDrawId = $nextGameDrawData->next_draw_id;
-               $lastDrawId = $nextGameDrawData->last_draw_id;
-               $objPayoutCtrl = new PlaySeriesController();
-               $payoutObj = DB::table('result_payout')->first();
-               if(!empty($payoutObj)){
-                   $payout=$payoutObj->payout_status;
-               }else{
-                   $payout='low';
-               }
-               DB::update('UPDATE draw_masters SET active = IF(serial_number = ?, 1,0)', [$nextDrawId]);
-               $newData = DB::statement(
-                   'CALL insert_game_result_details('.$lastDrawId.','."'".$payout."'".')'
+            try {
+                $nextGameDrawData = NextGameDraw::first();
+                $nextDrawId = $nextGameDrawData->next_draw_id;
+                $lastDrawId = $nextGameDrawData->last_draw_id;
+                $objPayoutCtrl = new PlaySeriesController();
+                $payoutObj = DB::table('result_payout')->first();
+//               if(!empty($payoutObj)){
+                $payout = $payoutObj->payout_status;
+//               }else{
+//                   $payout='low';
+//               }
+                DB::update('UPDATE draw_masters SET active = IF(serial_number = ?, 1,0)', [$nextDrawId]);
+                $newData = DB::statement(
+                    'CALL insert_game_result_details(' . $lastDrawId . ',' . "'" . $payout . "'" . ')'
                 );
-               $currentDate = Carbon::now()->format('Y-m-d');
-               $terminalPrizeValue = DB::select("select terminal_id, sum(prize_value)as prize_value
+                if ($newData) {
+                    $currentDate = Carbon::now()->format('Y-m-d');
+                    $terminalPrizeValue = DB::select("select terminal_id, sum(prize_value)as prize_value
                from (select play_masters.id,barcode_number,get_prize_value_of_barcode(barcode_number) as prize_value,terminal_id,is_claimed
                from play_masters where draw_master_id=? and date(play_masters.created_at)=?)
-               as table1 where prize_value>0 and is_claimed=0 group by terminal_id",[$lastDrawId,$currentDate]);
+               as table1 where prize_value>0 and is_claimed=0 group by terminal_id", [$lastDrawId, $currentDate]);
 
-                if(count($terminalPrizeValue)){
-                    foreach($terminalPrizeValue as $row){
-                        $terminalId = $row->terminal_id;
-                        $prizeValue = $row->prize_value;
-                        StockistToTerminal::where('terminal_id', $terminalId)
-                            ->update(array(
-                                'current_balance' => DB::raw( 'current_balance +'.$prizeValue)
-                            ) );
+                    if (count($terminalPrizeValue)) {
+                        foreach ($terminalPrizeValue as $row) {
+                            $terminalId = $row->terminal_id;
+                            $prizeValue = $row->prize_value;
+                            StockistToTerminal::where('terminal_id', $terminalId)
+                                ->update(array(
+                                    'current_balance' => DB::raw('current_balance +' . $prizeValue)
+                                ));
+                        }
                     }
-                }
 
-                $barcodeWiseClaimDetails = DB::select("select *
+                    $barcodeWiseClaimDetails = DB::select("select *
                 from (select id,barcode_number,get_prize_value_of_barcode(barcode_number) as prize_value,terminal_id,is_claimed
                 from play_masters where draw_master_id=? and date(created_at)=?)
-                as table1 where prize_value>0 and is_claimed=0;",[$lastDrawId,$currentDate]);
+                as table1 where prize_value>0 and is_claimed=0;", [$lastDrawId, $currentDate]);
 
 
-                foreach($barcodeWiseClaimDetails as $row){
-                    $terminalId = $row->terminal_id;
-                    $prizeValue = $row->prize_value;
-                    $barcode = $row->barcode_number;
-                    $playMasterId = $row->id;
-                    $playMasterObj = new PlayMaster();
-                    $playMasterObj->where('barcode_number', $barcode)->update(['is_claimed'=>1]);
-                    $claimDetailsObj = new ClaimDetails();
-                    $claimDetailsObj->game_id = 1;
-                    $claimDetailsObj->play_master_id = $playMasterId;
-                    $claimDetailsObj->terminal_id = $terminalId;
-                    $claimDetailsObj->prize_value = $prizeValue;
-                    $claimDetailsObj->save();
+                    foreach ($barcodeWiseClaimDetails as $row) {
+                        $terminalId = $row->terminal_id;
+                        $prizeValue = $row->prize_value;
+                        $barcode = $row->barcode_number;
+                        $playMasterId = $row->id;
+                        $playMasterObj = new PlayMaster();
+                        $playMasterObj->where('barcode_number', $barcode)->update(['is_claimed' => 1]);
+                        $claimDetailsObj = new ClaimDetails();
+                        $claimDetailsObj->game_id = 1;
+                        $claimDetailsObj->play_master_id = $playMasterId;
+                        $claimDetailsObj->terminal_id = $terminalId;
+                        $claimDetailsObj->prize_value = $prizeValue;
+                        $claimDetailsObj->save();
+                    }
+
+                    $totalDraw = DrawMaster::count();
+                    if ($nextDrawId == $totalDraw)
+                        $nextDrawId = 1;
+                    else
+                        $nextDrawId = $nextDrawId + 1;
+
+                    if ($lastDrawId == $totalDraw)
+                        $lastDrawId = 1;
+                    else
+                        $lastDrawId = $lastDrawId + 1;
+                    NextGameDraw::where('id', 1)
+                        ->update(['next_draw_id' => $nextDrawId, 'last_draw_id' => $lastDrawId]);
+                    DB::commit();
                 }
-
-               $totalDraw = DrawMaster::count();
-               if($nextDrawId==$totalDraw)
-                   $nextDrawId = 1;
-               else
-                   $nextDrawId = $nextDrawId + 1;
-
-               if($lastDrawId==$totalDraw)
-                   $lastDrawId = 1;
-               else
-                   $lastDrawId = $lastDrawId + 1;
-               NextGameDraw::where('id',1)
-               ->update(['next_draw_id' => $nextDrawId, 'last_draw_id' => $lastDrawId]);
-                DB::commit();
             }
 
             catch (Exception $e)
@@ -95,6 +96,23 @@ class CentralFunctionController extends Controller
 
            return response()->json(['nextDrawId'=> $nextDrawId,'totalDraw'=>$totalDraw], 200);
 
+    }
+
+    function newTest1(){
+        $nextGameDrawData = NextGameDraw::first();
+        $nextDrawId = $nextGameDrawData->next_draw_id;
+        $lastDrawId = $nextGameDrawData->last_draw_id;
+        $objPayoutCtrl = new PlaySeriesController();
+        $payoutObj = DB::table('result_payout')->first();
+//               if(!empty($payoutObj)){
+        $payout=$payoutObj->payout_status;
+        $newData = DB::statement(
+            'CALL insert_game_result_details('.$lastDrawId.','."'".$payout."'".')'
+        );
+        if($newData){
+            return response()->json(['data'=> $newData,'check'=> 1], 200);
+        }
+        return response()->json(['data'=> $newData], 200);
     }
 
 
