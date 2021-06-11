@@ -15,9 +15,9 @@ class CreateAllProceduresAndFunctions extends Migration
     public function up()
     {
         DB::unprepared('DROP FUNCTION IF EXISTS get_lucky_result;
-               CREATE FUNCTION `get_lucky_result`(`draw_id` INT, `draw_date` DATE, `payout` VARCHAR(20)) RETURNS int(11)
-               READS SQL DATA
-                DETERMINISTIC
+                CREATE FUNCTION `get_lucky_result`(`draw_id` INT, `draw_date` DATE, `payout` VARCHAR(20)) RETURNS int
+                    READS SQL DATA
+                    DETERMINISTIC
                 BEGIN
 
                   declare var_result int(11);
@@ -34,7 +34,7 @@ class CreateAllProceduresAndFunctions extends Migration
                         inner join play_details on play_details.play_master_id = play_masters.id
                         inner join play_series ON play_series.id = play_details.play_series_id
                         where play_masters.draw_master_id=draw_id and date(play_masters.created_at)=draw_date
-                        group by play_details.play_series_id order by prize_value asc,rand() limit 1) as table1;
+                        group by play_details.play_series_id,play_series.series_name,play_series.winning_price order by prize_value asc,rand() limit 1) as table1;
                     End if;
                   Elseif payout=\'high\'  Then
                   select play_series_id into var_result from
@@ -44,14 +44,15 @@ class CreateAllProceduresAndFunctions extends Migration
                     inner join play_details on play_details.play_master_id = play_masters.id
                     inner join play_series ON play_series.id = play_details.play_series_id
                     where play_masters.draw_master_id=draw_id and date(play_masters.created_at)=draw_date
-                    group by play_details.play_series_id order by prize_value desc,rand() limit 1) as table1;
+                    group by play_details.play_series_id,play_series.series_name,play_series.winning_price order by prize_value desc,rand() limit 1) as table1;
                   End if;
 
                 IF var_result IS NULL THEN
                     select id into var_result from play_series order by rand() limit 1;
                 end if;
                 return var_result;
-                END ;
+                END;
+
         ');
 
         DB::unprepared('DROP FUNCTION IF EXISTS get_lucky_result_bk;

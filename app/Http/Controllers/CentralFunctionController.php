@@ -24,16 +24,17 @@ class CentralFunctionController extends Controller
                 $lastDrawId = $nextGameDrawData->last_draw_id;
                 $objPayoutCtrl = new PlaySeriesController();
                 $payoutObj = DB::table('result_payout')->first();
-//               if(!empty($payoutObj)){
-                $payout = $payoutObj->payout_status;
-//               }else{
-//                   $payout='low';
-//               }
+               if(!empty($payoutObj)){
+                $payout = (String)$payoutObj->payout_status;
+               }else{
+                   $payout='low';
+               }
                 DB::update('UPDATE draw_masters SET active = IF(serial_number = ?, 1,0)', [$nextDrawId]);
                 $newData = DB::statement(
                     'CALL insert_game_result_details(' . $lastDrawId . ',' . "'" . $payout . "'" . ')'
                 );
-                if ($newData) {
+//                $newData = DB::select("CALL insert_game_result_details(?,?)", array($lastDrawId,(string)$payout));
+//                if ($newData) {
                     $currentDate = Carbon::now()->format('Y-m-d');
                     $terminalPrizeValue = DB::select("select terminal_id, sum(prize_value)as prize_value
                from (select play_masters.id,barcode_number,get_prize_value_of_barcode(barcode_number) as prize_value,terminal_id,is_claimed
@@ -86,7 +87,7 @@ class CentralFunctionController extends Controller
                         ->update(['next_draw_id' => $nextDrawId, 'last_draw_id' => $lastDrawId]);
                     DB::commit();
                 }
-            }
+//            }
 
             catch (Exception $e)
             {

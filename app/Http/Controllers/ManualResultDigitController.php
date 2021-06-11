@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\DrawMaster;
 use App\Model\ManualResultDigit;
 use App\Model\PlaySeries;
 use App\Model\RechargeToTerminal;
@@ -15,6 +16,7 @@ use Exception;
 class ManualResultDigitController extends Controller
 {
     public function getDrawTimeForManualResult(){
+//        $drawTime = DrawMaster::selelct()->get();
         $drawTime = DB::select(DB::raw("select * from draw_masters where id not in
         (select draw_master_id from result_masters where date(created_at)=(curdate())) AND id not in
         (select draw_master_id from manual_result_digits where date(created_at)=curdate()) order by serial_number"));
