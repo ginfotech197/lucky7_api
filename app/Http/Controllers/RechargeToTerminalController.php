@@ -19,6 +19,7 @@ class RechargeToTerminalController extends Controller
         $terminal_id = $requestedData->terminal_id;
         $recharge_master_id = $requestedData->recharge_master_id;
         $recharge_master_cat_id = $requestedData->recharge_master_cat_id;
+//        $total_balance = $requestedData->current_balance_terminal + $amount;
 
         try
         {
@@ -26,6 +27,7 @@ class RechargeToTerminalController extends Controller
             $rechargeToTerminalObj->recharge_master_id = $recharge_master_id;
             $rechargeToTerminalObj->terminal_id = $terminal_id;
             $rechargeToTerminalObj->recharge_master_cat_id = $recharge_master_cat_id;
+//            $rechargeToTerminalObj->total_balance = $total_balance;
             $rechargeToTerminalObj->save();
 
             StockistToTerminal::where('terminal_id',$terminal_id)
@@ -128,6 +130,21 @@ class RechargeToTerminalController extends Controller
         $terminal_id = $requestedData->terminal_id;
         $reportData = DB::select('call fetch_terminal_digit_total_sale(?,?,?)',array($terminal_id,$start_date,$end_date));
         echo json_encode($reportData,JSON_NUMERIC_CHECK);
+    }
+
+    public function detailingOfStockiestToTerminal(request $request){
+        $requestedData = (object)($request->json()->all());
+        $master_id = $requestedData->master_id;
+
+        $data = DB::select("select people.people_name, people.people_unique_id
+            ,abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as credit
+            ,if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0)  as debit
+            ,recharge_to_terminals.created_at from recharge_to_terminals
+            inner join stockists on recharge_to_terminals.recharge_master_id = stockists.id
+            right join people ON people.id = recharge_to_terminals.terminal_id
+            where recharge_master_id = '$master_id'
+            order by recharge_to_terminals.created_at",[$master_id]);
+        return response()->json(array('success' => 1, 'data' => $data),200);
     }
 
 

@@ -39,6 +39,8 @@ Route::group(array('prefix' => 'v1'), function() {
     Route::post('/getResultsByDate','ResultDetailsController@getResultsByDate');
     Route::post('/deleteUnusualData','ResultMasterController@deleteUnusualData');
     Route::post('/createResultFromEmergencyPanel','CentralFunctionController@createResultFromEmergencyPanel');
+
+//    Route::post('/detailingOfStockiestToTerminal','RechargeToTerminalController@detailingOfStockiestToTerminal');
 });
 
 Route::group(['prefix' => 'v1',  'middleware' => 'authCheck'], function()
@@ -91,6 +93,7 @@ Route::group(['prefix' => 'v1',  'middleware' => 'authCheck'], function()
     Route::post('/terminalTicketSaleReportFromCpanel','RechargeToTerminalController@terminalTicketSaleReportFromCpanel');
     Route::post('/getSaleReportByTerminalId','RechargeToTerminalController@getSaleReportByTerminalId');
     Route::post('/terminalDateWiseReportFromCPanel','RechargeToTerminalController@terminalDateWiseReportFromCPanel');
+    Route::post('/detailingOfStockiestToTerminal','RechargeToTerminalController@detailingOfStockiestToTerminal');
 
     //addMessage & emergency
     Route::post('/addNewMessage','GameMessageController@addNewMessage');
