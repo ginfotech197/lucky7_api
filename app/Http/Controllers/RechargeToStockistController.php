@@ -41,4 +41,18 @@ class RechargeToStockistController extends Controller
         }
         return response()->json(array('success' => 1, 'message' => 'Successfully recorded', 'current_balance' => $currentBalance),200);
     }
+
+    public function rechargeToStockiestDetailing(request $request){
+        $requestedData = (object)($request->json()->all());
+        $master_id = $requestedData->master_id;
+
+        $data = DB::select("select people.people_name, stockists.stockist_name, stockists.stockist_unique_id, recharge_to_stockists.created_at
+            , abs(if(recharge_to_stockists.amount<0,recharge_to_stockists.amount,0)) as credit
+            , if(recharge_to_stockists.amount>=0,recharge_to_stockists.amount,0) as debit from recharge_to_stockists
+            inner join people ON people.id = recharge_to_stockists.recharge_master
+            inner join stockists on stockists.id = recharge_to_stockists.stockist_id
+            where recharge_to_stockists.recharge_master= '$master_id'
+            order by recharge_to_stockists.created_at",[$master_id]);
+        return response()->json(array('success' => 1, 'data' => $data),200);
+    }
 }
