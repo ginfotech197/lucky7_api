@@ -91,7 +91,7 @@ class StockistToTerminalController extends Controller
             $StockistToTerminalObj = new StockistToTerminal();
             $StockistToTerminalObj->stockist_id = $stockist_id;
             $StockistToTerminalObj->terminal_id = $lastInsertedTerminalId;
-            $StockistToTerminalObj->commission = $requestedData->terminal['commission'];
+            $StockistToTerminalObj->commission = 0;
             $StockistToTerminalObj->save();
             DB::commit();
         }
@@ -160,4 +160,5 @@ class StockistToTerminalController extends Controller
 //        }
         return response()->json(array('success' => 1, 'message' => 'Password reset successfully'),200);
     }
+
 }

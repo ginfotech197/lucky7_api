@@ -94,6 +94,7 @@ Route::group(['prefix' => 'v1',  'middleware' => 'authCheck'], function()
     Route::post('/getSaleReportByTerminalId','RechargeToTerminalController@getSaleReportByTerminalId');
     Route::post('/terminalDateWiseReportFromCPanel','RechargeToTerminalController@terminalDateWiseReportFromCPanel');
     Route::post('/detailingOfStockiestToTerminal','RechargeToTerminalController@detailingOfStockiestToTerminal');
+    Route::get('/stockiestToTerminalDetails','RechargeToTerminalController@stockiestToTerminalDetails');
     Route::post('/rechargeToStockiestDetailing','RechargeToStockistController@rechargeToStockiestDetailing');
 
     //addMessage & emergency

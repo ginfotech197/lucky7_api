@@ -47,7 +47,7 @@ class StockistController extends Controller
             $stockistObj->user_id = $requestedData->stockist['user_id'];
             $stockistObj->user_password = $requestedData->stockist['user_password'];
             $stockistObj->serial_number = $max_table_data->current_value;
-            $stockistObj->commission = $requestedData->stockist['commission'];
+            $stockistObj->commission = 0;
             $stockistObj->person_category_id = 4;
             $stockistObj->save();
             $lastStockistId = DB::getPdo()->lastInsertId();

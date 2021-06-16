@@ -225,4 +225,16 @@ class RechargeToTerminalController extends Controller
         }
         return response()->json(['point'=> $terminalCurrentBalance], 200);
     }
+
+    public function stockiestToTerminalDetails(){
+        $data = DB::select("select stockists.stockist_unique_id,stockists.stockist_name, people.people_name
+                , abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as credit
+                , if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0) as debit
+                ,recharge_to_terminals.created_at from recharge_to_terminals
+                inner join stockists on stockists.id = recharge_to_terminals.recharge_master_id
+                inner join people ON people.id = recharge_to_terminals.terminal_id
+                order by recharge_to_terminals.created_at");
+
+        return response()->json(['data'=> $data], 200);
+    }
 }
