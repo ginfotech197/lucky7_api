@@ -69,6 +69,17 @@ class PersonController extends Controller
         return $person;
     }
 
+    public function checkUserIdAvailAbility(request $request){
+        $data=(object)($request->json()->all());
+        $userID = $data->temp_user_id;
+        $check = Person::select()->where('user_id','=',$userID)->where('people_unique_id','=',$userID)->first();
+        if($check){
+            return response()->json(['success'=> 1,'message'=>'Username not available'], 200);
+        }else
+        return response()->json(['success'=> 1,'message'=>'Username available'], 200);
+
+    }
+
     public function getCurrentTimestamp(){
 
         $current_date_time = \Carbon\Carbon::now()->toDateTimeString();

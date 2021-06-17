@@ -49,6 +49,7 @@ Route::group(['prefix' => 'v1',  'middleware' => 'authCheck'], function()
     Route::get('/person/{id}/getBalance','StockistToTerminalController@getTerminalBalance');
     Route::post('/saveGameInputDetails','PlayMasterController@saveGameInputDetails');
     Route::post('/getTerminalBalance','PersonController@getLoggedInTerminalBalance');
+    Route::post('/checkUserIdAvailAbility','PersonController@checkUserIdAvailAbility');
 
     //AdminResetPassword
     Route::post('/resetAdminPassword','PersonController@resetAdminPassword');

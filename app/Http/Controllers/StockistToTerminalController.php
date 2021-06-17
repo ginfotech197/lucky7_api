@@ -60,6 +60,7 @@ class StockistToTerminalController extends Controller
 
     public function saveNewTerminal(request $request){
         $requestedData = (object)($request->json()->all());
+//        return response()->json(['success'=> 1,'message'=>$requestedData], 200);
         $objCentralFunctionCtrl = new CentralFunctionController();
         $serialnumber = $requestedData->stockist_sl_no;
         $stockist_id = $requestedData->stockist_id;
@@ -67,18 +68,18 @@ class StockistToTerminalController extends Controller
         DB::beginTransaction();
         try
         {
-            DB::insert("insert into max_tables (subject_name,person_category_id, current_value, financial_year,prefix)
-            values('terminal',3,6106001,?,'T')
-            on duplicate key UPDATE id=last_insert_id(id), current_value=current_value+1", [$financial_year]);
-            $lastInsertId = DB::getPdo()->lastInsertId();
-            $max_table_data = MaxTable::where('id',$lastInsertId)->first();
-            $terminalUniqueId = $max_table_data->current_value;
+//            DB::insert("insert into max_tables (subject_name,person_category_id, current_value, financial_year,prefix)
+//            values('terminal',3,6106001,?,'T')
+//            on duplicate key UPDATE id=last_insert_id(id), current_value=current_value+1", [$financial_year]);
+//            $lastInsertId = DB::getPdo()->lastInsertId();
+//            $max_table_data = MaxTable::where('id',$lastInsertId)->first();
+//            $terminalUniqueId = $max_table_data->current_value;
 //            $terminalUniqueId = 'T'.$serialnumber.'-'.str_pad($currentValue,4,"0",STR_PAD_LEFT);
 
             $terminalObj = new Person();
-            $terminalObj->people_unique_id = $terminalUniqueId;
+            $terminalObj->people_unique_id = $requestedData->terminal['user_id'];
             $terminalObj->people_name = $requestedData->terminal['people_name'];
-            $terminalObj->user_id = $terminalUniqueId;
+            $terminalObj->user_id = $requestedData->terminal['user_id'];
             $terminalObj->user_password = $requestedData->terminal['user_password'];
             $terminalObj->default_password = $requestedData->terminal['user_password'];
             $terminalObj->person_category_id = 3;
