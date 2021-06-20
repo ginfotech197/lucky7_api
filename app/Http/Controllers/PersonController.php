@@ -116,6 +116,12 @@ class PersonController extends Controller
             ->where('user_password', $user_data->old_psw)
             ->update(['user_password'=>$userPsw]);
 
+        if($updateInfo != 1){
+            $updateInfo = Stockist::where('id',$userId)
+                ->where('user_password', $user_data->old_psw)
+                ->update(['user_password'=>$userPsw]);
+        }
+
         if($updateInfo==1){
             return response()->json(array('success' => 1, 'message' => 'Successfully recorded'),200);
         }else{

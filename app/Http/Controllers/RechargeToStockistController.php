@@ -29,10 +29,10 @@ class RechargeToStockistController extends Controller
                 'current_balance' => DB::raw( 'current_balance +'.$amount)
             ) );
 
-            Stockist::where('id',1)
-                ->update(array(
-                    'current_balance' => DB::raw( 'current_balance -'.$amount)
-                ) );
+//            Stockist::where('id',1)
+//                ->update(array(
+//                    'current_balance' => DB::raw( 'current_balance -'.$amount)
+//                ) );
 
             $stockistData = Stockist::where('id',$stockist_id)->first();
             $currentBalance = $stockistData->current_balance;
