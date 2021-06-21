@@ -136,14 +136,22 @@ class RechargeToTerminalController extends Controller
         $requestedData = (object)($request->json()->all());
         $master_id = $requestedData->master_id;
 
+//        $data = DB::select("select people.people_name, people.people_unique_id
+//            ,abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as credit
+//            ,if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0)  as debit
+//            ,recharge_to_terminals.created_at from recharge_to_terminals
+//            inner join stockists on recharge_to_terminals.recharge_master_id = stockists.id
+//            right join people ON people.id = recharge_to_terminals.terminal_id
+//            where recharge_master_id = '$master_id'
+//            order by recharge_to_terminals.created_at",[$master_id]);
+
         $data = DB::select("select people.people_name, people.people_unique_id
-            ,abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as credit
-            ,if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0)  as debit
+            ,abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as debit
+            ,if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0)  as credit
             ,recharge_to_terminals.created_at from recharge_to_terminals
             inner join stockists on recharge_to_terminals.recharge_master_id = stockists.id
             right join people ON people.id = recharge_to_terminals.terminal_id
-            where recharge_master_id = '$master_id'
-            order by recharge_to_terminals.created_at",[$master_id]);
+            order by recharge_to_terminals.created_at");
         return response()->json(array('success' => 1, 'data' => $data),200);
     }
 
@@ -228,8 +236,8 @@ class RechargeToTerminalController extends Controller
 
     public function stockiestToTerminalDetails(){
         $data = DB::select("select stockists.stockist_unique_id,stockists.stockist_name, people.people_name
-                , abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as credit
-                , if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0) as debit
+                , abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as debit
+                , if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0) as credit
                 ,recharge_to_terminals.created_at from recharge_to_terminals
                 inner join stockists on stockists.id = recharge_to_terminals.recharge_master_id
                 inner join people ON people.id = recharge_to_terminals.terminal_id
