@@ -37,7 +37,7 @@ class ResultDetailsController extends Controller
             ->whereRaw('result_masters.game_date=curdate()')
 //            ->orderBy('result_masters.draw_master_id','desc')
             ->orderBy('result_masters.id','desc')
-            ->limit(6)
+            ->limit(4)
             ->get();
         echo json_encode($result,JSON_NUMERIC_CHECK);
     }
