@@ -39,6 +39,7 @@ Route::group(array('prefix' => 'v1'), function() {
     Route::post('/getResultsByDate','ResultDetailsController@getResultsByDate');
     Route::post('/deleteUnusualData','ResultMasterController@deleteUnusualData');
     Route::post('/createResultFromEmergencyPanel','CentralFunctionController@createResultFromEmergencyPanel');
+    Route::post('/getTotalAmountSingleDraw','PlayMasterController@getTotalAmountSingleDraw');
 
 //    Route::post('/detailingOfStockiestToTerminal','RechargeToTerminalController@detailingOfStockiestToTerminal');
 });

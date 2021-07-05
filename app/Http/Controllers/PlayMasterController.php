@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\DrawMaster;
 use App\Model\PlayMaster;
 use App\Model\BarcodeMax;
 use App\Model\PlayDetails;
@@ -82,6 +83,35 @@ class PlayMasterController extends Controller
             }
 
             return response()->json(['success'=> 1,'barcode'=>$barcode, 'purchase_date' => $currentDate, 'purchase_time' => $currentTime,'current_balance'=> $currentBalance->current_balance], 200);
+    }
+
+    public function getTotalAmountSingleDraw(request $request){
+        $requestedData = (object)($request->json()->all());
+        $terminal_id = $requestedData->terminalId;
+        $activeDraw = DrawMaster::select()->where('active',1)->first();
+
+//        $data =DB::select("select if(play_details.input_value,convert(sum(play_details.input_value),UNSIGNED),0) as total_input, play_masters.terminal_id, play_masters.draw_master_id from play_details
+//            inner join play_masters ON play_masters.id = play_details.play_master_id
+//            inner join people on people.id = play_masters.terminal_id
+//            where play_masters.terminal_id =?  and play_masters.draw_master_id = ?
+//            group by play_masters.terminal_id,play_masters.draw_master_id,play_details.input_value", array($terminal_id, $activeDraw->id));
+
+        $data = DB::select("select sum(input_value) as total_input from (select play_details.input_value, play_masters.terminal_id, play_masters.draw_master_id from play_details
+            inner join play_masters ON play_masters.id = play_details.play_master_id
+            inner join people on people.id = play_masters.terminal_id
+            where play_masters.terminal_id =?  and play_masters.draw_master_id = ?
+            group by play_masters.terminal_id,play_masters.draw_master_id,play_details.input_value) as table1", array($terminal_id, $activeDraw->id));
+
+        if($data){
+            $result = $data[0];
+        }else{
+            $data['total_input'] = 0;
+            $data['terminal_id'] = $terminal_id;
+            $data['draw_master_id'] = $activeDraw->id;
+            $result = $data;
+        }
+
+        return response()->json(['success'=> 1,'data'=>$result], 200);
     }
 
 

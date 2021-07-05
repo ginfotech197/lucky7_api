@@ -6,6 +6,7 @@ use App\Model\Person;
 use App\Model\StockistToTerminal;
 use App\Model\Stockist;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Webpatser\Uuid\Uuid;
 use \Carbon\Carbon;
 
@@ -41,6 +42,9 @@ class PersonController extends Controller
             $person->is_loggedin = 1;
             $result=$person->save();
             $StockistToTerminal=Person::find($person->id)->StockistToTerminal->first();
+            if($StockistToTerminal == null){
+                $person->current_balance = Stockist::select('current_balance')->where('id',1)->first()['current_balance'];
+            }
             $arrResponse = ['success'=>$result,'isLoggedIn'=>$result,'person'=>$person,'StockistToTerminal'=>$StockistToTerminal,'msg'=>'Login Successful'];
         }
 

@@ -29,10 +29,12 @@ class RechargeToStockistController extends Controller
                 'current_balance' => DB::raw( 'current_balance +'.$amount)
             ) );
 
-//            Stockist::where('id',1)
-//                ->update(array(
-//                    'current_balance' => DB::raw( 'current_balance -'.$amount)
-//                ) );
+            Stockist::where('id',1)
+                ->update(array(
+                    'current_balance' => DB::raw( 'current_balance -'.$amount)
+                ) );
+
+            $adminBal = Stockist::select('current_balance')->where('id',1)->first()['current_balance'];
 
             $stockistData = Stockist::where('id',$stockist_id)->first();
             $currentBalance = $stockistData->current_balance;
@@ -44,7 +46,7 @@ class RechargeToStockistController extends Controller
             DB::rollBack();
             return response()->json(array('success' => 0, 'message' => $e->getMessage().'<br>File:-'.$e->getFile().'<br>Line:-'.$e->getLine()),401);
         }
-        return response()->json(array('success' => 1, 'message' => 'Successfully recorded', 'current_balance' => $currentBalance),200);
+        return response()->json(array('success' => 1, 'message' => 'Successfully recorded', 'current_balance' => $currentBalance, 'admin_balance'=>$adminBal),200);
     }
 
     public function rechargeToStockiestDetailing(request $request){
