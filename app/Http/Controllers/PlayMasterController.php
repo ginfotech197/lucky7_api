@@ -26,18 +26,29 @@ class PlayMasterController extends Controller
 
             try
             {
-                DB::insert("insert into barcode_maxes (subject_name, current_value, prefix, financial_year)
-                values('digit bill',1,'LS',?)
-                on duplicate key UPDATE id=last_insert_id(id), current_value=current_value+1", [$financial_year]);
-                $lastInsertId = DB::getPdo()->lastInsertId();
-                $lastGeneratedBarcode = BarcodeMax::where('id', $lastInsertId)->first();
-
-                $bcd = str_pad($lastGeneratedBarcode->current_value,10,"0",STR_PAD_LEFT).''.$financial_year;
+//                DB::insert("insert into barcode_maxes (subject_name, current_value, prefix, financial_year)
+//                values('digit bill',1,'LS',?)
+//                on duplicate key UPDATE id=last_insert_id(id), current_value=current_value+1", [$financial_year]);
+//                $lastInsertId = DB::getPdo()->lastInsertId();
+//                $lastGeneratedBarcode = BarcodeMax::where('id', $lastInsertId)->first();
+//
+//                $bcd = str_pad($lastGeneratedBarcode->current_value,10,"0",STR_PAD_LEFT).''.$financial_year;
                 $currentDate = Carbon::now()->format('d/m/Y');
                 $currentTime = Carbon::now()->format('H:i:s');
+                $barcodeGenerate = DB::select(DB::raw("select LPAD(FLOOR(RAND() * 99999999.999), 8, '0') as code"));
+                $barcode = 'L7'.$barcodeGenerate[0]->code;
+                $dataCheck = PlayMaster::select()->where('barcode_number', '=', $barcode)->where('created_at', '=', $currentDate)->first();
+                if($dataCheck){
+                    $barcodeGenerate = DB::select(DB::raw("select LPAD(FLOOR(RAND() * 99999999.999), 8, '0') as code"));
+                    $barcode = 'L7'.$barcodeGenerate[0]->code;
+                }
+
+
+//                $currentDate = Carbon::now()->format('d/m/Y');
+//                $currentTime = Carbon::now()->format('H:i:s');
                 $terminalId = $allRequestedData->userId;
-                $prefix = $lastGeneratedBarcode->prefix;
-                $barcode = $prefix.''.$bcd;
+//                $prefix = $lastGeneratedBarcode->prefix;
+//                $barcode = $prefix.''.$bcd;
                 $terminalCommission = 0;
                 $stockistCommission = 0;
                 $getCommission = StockistToTerminal::select('stockist_to_terminals.commission as terminal_commission','stockists.commission as stockist_commission')
