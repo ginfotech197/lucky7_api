@@ -17,6 +17,10 @@ class CentralFunctionController extends Controller
 
     function createNewResult(){
 
+//        $currentDraw = DrawMaster::select('id','end_time')->whereRaw('end_time >= ?', [DB::raw("select curtime()")])
+//            ->whereRaw('start_time <= ?', [DB::raw("select curtime()")])
+//            ->orderBy('id')->first();
+
         DB::beginTransaction();
             try {
                 $nextGameDrawData = NextGameDraw::first();

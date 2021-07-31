@@ -32,6 +32,17 @@ class StockistToTerminalController extends Controller
                     ->where('stockists.inforce','=',1)
                     ->where('stockist_to_terminals.inforce','=',1)
                     ->get();
+      foreach ($allTerminals as $x){
+          $data = DB::select("select sum(get_prize_value_of_barcode(barcode_number)) as total_prize from play_masters where terminal_id = ?",[$x->terminal_id])[0];
+          $y = (object)$x;
+          if(($data->total_prize)>($y->terminal_current_balance)){
+              $y->terminal_current_balance = 0;
+          }else{
+              $y->terminal_current_balance = $y->terminal_current_balance - ($data->total_prize);
+          }
+          $y->prize_value = $data->total_prize;
+      }
+
         echo json_encode($allTerminals);
     }
 
