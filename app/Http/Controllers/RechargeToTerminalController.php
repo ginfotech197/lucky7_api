@@ -145,12 +145,13 @@ class RechargeToTerminalController extends Controller
 //            where recharge_master_id = '$master_id'
 //            order by recharge_to_terminals.created_at",[$master_id]);
 
-        $data = DB::select("select people.people_name, people.people_unique_id
+        $data = DB::select("select people.id, people.people_name, people.people_unique_id
             ,abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as debit
             ,if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0)  as credit
             ,recharge_to_terminals.created_at from recharge_to_terminals
             inner join stockists on recharge_to_terminals.recharge_master_id = stockists.id
             right join people ON people.id = recharge_to_terminals.terminal_id
+            where people.person_category_id = 3
             order by recharge_to_terminals.created_at");
         return response()->json(array('success' => 1, 'data' => $data),200);
     }

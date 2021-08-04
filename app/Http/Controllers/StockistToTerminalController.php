@@ -32,16 +32,16 @@ class StockistToTerminalController extends Controller
                     ->where('stockists.inforce','=',1)
                     ->where('stockist_to_terminals.inforce','=',1)
                     ->get();
-      foreach ($allTerminals as $x){
-          $data = DB::select("select sum(get_prize_value_of_barcode(barcode_number)) as total_prize from play_masters where terminal_id = ?",[$x->terminal_id])[0];
-          $y = (object)$x;
-          if(($data->total_prize)>($y->terminal_current_balance)){
-              $y->terminal_current_balance = 0;
-          }else{
-              $y->terminal_current_balance = $y->terminal_current_balance - ($data->total_prize);
-          }
-          $y->prize_value = $data->total_prize;
-      }
+//      foreach ($allTerminals as $x){
+//          $data = DB::select("select sum(get_prize_value_of_barcode(barcode_number)) as total_prize from play_masters where terminal_id = ?",[$x->terminal_id])[0];
+//          $y = (object)$x;
+//          if(($data->total_prize)>($y->terminal_current_balance)){
+//              $y->terminal_current_balance = 0;
+//          }else{
+//              $y->terminal_current_balance = $y->terminal_current_balance - ($data->total_prize);
+//          }
+//          $y->prize_value = $data->total_prize;
+//      }
 
         echo json_encode($allTerminals);
     }
@@ -171,6 +171,70 @@ class StockistToTerminalController extends Controller
 //            return response()->json(array('success' => 0, 'message' => $e->getMessage().'<br>File:-'.$e->getFile().'<br>Line:-'.$e->getLine()),401);
 //        }
         return response()->json(array('success' => 1, 'message' => 'Password reset successfully'),200);
+    }
+
+    public function reportGeneration(request $request){
+        $requestedData = (object)($request->json()->all());
+        $id = $requestedData->terminalId;
+       $calc = 0;
+        $data = DB::select("select * from (select if(recharge_to_terminals.amount>0,'Amount Credited','Amount Deducted') as comment, recharge_to_terminals.amount as amount, recharge_to_terminals.amount as amt_cr
+                , recharge_to_terminals.terminal_id , 0 as prize_value, recharge_to_terminals.created_at  from recharge_to_terminals
+                union All
+                select concat('Played - ', play_masters.barcode_number) as comment, sum(play_details.input_value * 1) as amount, 0 as amt_cr,
+                play_masters.terminal_id
+                , get_prize_value_of_barcode(play_masters.barcode_number) as prize_value,
+                play_masters.created_at from play_masters
+                inner join play_details on play_details.play_master_id = play_masters.id
+                group by play_masters.id, play_masters.barcode_number,play_masters.terminal_id,play_masters.created_at) as table1
+                where terminal_id = ?
+                order by created_at
+       ",[$id]);
+
+       foreach ($data as $x){
+           $y = (object)$x;
+           $calc = $calc + $x->amt_cr;
+           if($x->amt_cr == 0) {
+               $calc = $calc - ($x->amount) + ($x->prize_value);
+           }
+           $y->remaining_balance = $calc;
+       }
+        return response()->json(array('success' => 1, 'data' => $data),200);
+    }
+
+    public function adminReportGeneration(request $request){
+        $requestedData = (object)($request->json()->all());
+        $id = $requestedData->terminalId;
+        $startDate = $requestedData->start_date;
+        $endDate = $requestedData->end_date;
+        $calc = 0;
+        $data = DB::select("select * from (select if(recharge_to_terminals.amount>0,'Amount Credited','Amount Deducted') as comment, recharge_to_terminals.amount as amount, recharge_to_terminals.amount as amt_cr
+                , recharge_to_terminals.terminal_id , 0 as prize_value, recharge_to_terminals.created_at  from recharge_to_terminals
+                union All
+                select concat('Played - ', play_masters.barcode_number) as comment, sum(play_details.input_value * 1) as amount, 0 as amt_cr,
+                play_masters.terminal_id
+                , get_prize_value_of_barcode(play_masters.barcode_number) as prize_value,
+                play_masters.created_at from play_masters
+                inner join play_details on play_details.play_master_id = play_masters.id
+                group by play_masters.id, play_masters.barcode_number,play_masters.terminal_id,play_masters.created_at) as table1
+                where terminal_id = ?
+                order by created_at",[$id]);
+
+        foreach ($data as $x){
+            $y = (object)$x;
+            $calc = $calc + $x->amt_cr;
+            if($x->amt_cr == 0) {
+                $calc = $calc - ($x->amount) + ($x->prize_value);
+            }
+            $y->remaining_balance = $calc;
+        }
+
+        $data1 = [];
+        foreach ($data as $x){
+            if(date('Y-m-d', strtotime($x->created_at)) >= $startDate && date('Y-m-d', strtotime($x->created_at))<= $endDate){
+                array_push($data1,$x);
+            }
+        }
+        return response()->json(array('success' => 1, 'data' => $data1),200);
     }
 
 }

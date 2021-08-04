@@ -41,6 +41,10 @@ Route::group(array('prefix' => 'v1'), function() {
     Route::post('/createResultFromEmergencyPanel','CentralFunctionController@createResultFromEmergencyPanel');
     Route::post('/getTotalAmountSingleDraw','PlayMasterController@getTotalAmountSingleDraw');
 
+
+    Route::post('/reportGeneration','StockistToTerminalController@reportGeneration');
+    Route::post('/adminReportGeneration','StockistToTerminalController@adminReportGeneration');
+
 //    Route::post('/detailingOfStockiestToTerminal','RechargeToTerminalController@detailingOfStockiestToTerminal');
 });
 
