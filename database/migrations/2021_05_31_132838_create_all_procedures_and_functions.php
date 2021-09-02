@@ -512,8 +512,8 @@ class CreateAllProceduresAndFunctions extends Migration
             END ;
         ');
 
-        DB::unprepared('DROP PROCEDURE IF EXISTS gamepane_lucky7_db.transaction_report_by_terminal;
-                CREATE PROCEDURE gamepane_lucky7_db.`transaction_report_by_terminal`(IN `term_id` VARCHAR(100), IN `start_date` DATE, IN `end_date` DATE)
+        DB::unprepared('DROP PROCEDURE IF EXISTS transaction_report_by_terminal;
+                CREATE PROCEDURE `transaction_report_by_terminal`(IN `term_id` VARCHAR(100), IN `start_date` DATE, IN `end_date` DATE)
                 BEGIN
                             select * from (SELECT \'\' as activity_time,1 as `type`,\'opening point\' as \'transaction_type\',\'\' as barcode_number,get_opening_balance(start_date,term_id) as total
                 UNION
