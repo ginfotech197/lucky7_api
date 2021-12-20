@@ -1,0 +1,26 @@
+DROP FUNCTION IF EXISTS gamepane_lucky7_db.get_prize_value_of_barcode;
+if barcode error occurs please copy this and recreate
+
+CREATE FUNCTION gamepane_lucky7_db.`get_prize_value_of_barcode`(`barcode` VARCHAR(30)) RETURNS double
+    READS SQL DATA
+    DETERMINISTIC
+BEGIN
+              SET @prize_value=0;
+              SET @total_prize_value=0;
+              SET @target_row='';
+              select max(play_masters.draw_master_id),date(max(play_masters.created_at)) into @draw_id, @draw_date
+              from play_details
+              inner join (select * from play_masters where barcode_number=barcode)as play_masters ON play_masters.id = play_details.play_master_id
+              inner join play_series ON play_series.id = play_details.play_series_id;
+			  
+              select play_series_id into @target_row from result_masters where game_date=@draw_date and draw_master_id=@draw_id;
+			  
+              select (play_details.input_value * play_series.winning_price) into @prize_value from play_details
+              inner join play_series ON play_series.id = play_details.play_series_id
+              inner join play_masters ON play_masters.id = play_details.play_master_id
+              where barcode_number= barcode AND play_details.play_series_id=@target_row;
+                IF @prize_value IS NULL THEN
+                    SET @prize_value = 0;
+              END IF;
+              RETURN @prize_value;
+            END

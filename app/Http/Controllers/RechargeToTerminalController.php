@@ -19,7 +19,6 @@ class RechargeToTerminalController extends Controller
         $terminal_id = $requestedData->terminal_id;
         $recharge_master_id = $requestedData->recharge_master_id;
         $recharge_master_cat_id = $requestedData->recharge_master_cat_id;
-//        $total_balance = $requestedData->current_balance_terminal + $amount;
 
         try
         {
@@ -27,7 +26,6 @@ class RechargeToTerminalController extends Controller
             $rechargeToTerminalObj->recharge_master_id = $recharge_master_id;
             $rechargeToTerminalObj->terminal_id = $terminal_id;
             $rechargeToTerminalObj->recharge_master_cat_id = $recharge_master_cat_id;
-//            $rechargeToTerminalObj->total_balance = $total_balance;
             $rechargeToTerminalObj->save();
 
             StockistToTerminal::where('terminal_id',$terminal_id)
@@ -136,15 +134,6 @@ class RechargeToTerminalController extends Controller
         $requestedData = (object)($request->json()->all());
         $master_id = $requestedData->master_id;
 
-//        $data = DB::select("select people.people_name, people.people_unique_id
-//            ,abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as credit
-//            ,if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0)  as debit
-//            ,recharge_to_terminals.created_at from recharge_to_terminals
-//            inner join stockists on recharge_to_terminals.recharge_master_id = stockists.id
-//            right join people ON people.id = recharge_to_terminals.terminal_id
-//            where recharge_master_id = '$master_id'
-//            order by recharge_to_terminals.created_at",[$master_id]);
-
         $data = DB::select("select people.id, people.people_name, people.people_unique_id
             ,abs(if(recharge_to_terminals.amount<0,recharge_to_terminals.amount,0)) as debit
             ,if(recharge_to_terminals.amount>=0,recharge_to_terminals.amount,0)  as credit
@@ -153,6 +142,7 @@ class RechargeToTerminalController extends Controller
             right join people ON people.id = recharge_to_terminals.terminal_id
             where people.person_category_id = 3
             order by recharge_to_terminals.created_at");
+
         return response()->json(array('success' => 1, 'data' => $data),200);
     }
 
@@ -177,10 +167,31 @@ class RechargeToTerminalController extends Controller
         $terminalId = $requestedData->terminalId;
         $startDate = $requestedData->startDate;
         $endDate = $requestedData->endDate;
-
         $reportData = DB::select('call barcode_report_total_point_wise(?,?,?)',array($terminalId,$startDate,$endDate));
-        echo json_encode($reportData,JSON_NUMERIC_CHECK);
+
+        // $reportData = DB::select(" select  max(created_at) as ticket_time
+        // ,barcode_number,draw_master_id,end_time,sum(input_value)*max(mrp) as total, 0 as prize,is_claimed from (select play_details.play_master_id, play_details.play_series_id, play_details.input_value,
+        // play_series.mrp,draw_masters.end_time,play_masters.created_at, play_masters.barcode_number, play_masters.is_claimed,
+        // play_masters.activity_done_by, play_masters.terminal_id, play_masters.draw_master_id from play_details
+        // INNER join play_masters ON play_masters.id = play_details.play_master_id
+        // inner join play_series ON play_series.id = play_details.play_series_id
+        // inner join draw_masters ON draw_masters.id = play_masters.draw_master_id
+        // where play_masters.terminal_id=? AND date(play_masters.created_at) between ? and ?) as table1
+        // group by play_master_id;",[$terminalId,$startDate,$endDate]);
+
+        //return 1;
+        return json_encode($reportData,JSON_NUMERIC_CHECK);
     }
+
+    // public function getTransactionReportFromTerminal(request $request){
+    //     $requestedData = (object)($request->json()->all());
+    //     $terminalId = $requestedData->terminalId;
+    //     $startDate = $requestedData->startDate;
+    //     $endDate = $requestedData->endDate;
+
+    //     $reportData = DB::select('call transaction_report_by_terminal(?,?,?)',array($terminalId,$startDate,$endDate));
+    //     echo json_encode($reportData,JSON_NUMERIC_CHECK);
+    // }
 
     public function getTransactionReportFromTerminal(request $request){
         $requestedData = (object)($request->json()->all());
@@ -189,6 +200,37 @@ class RechargeToTerminalController extends Controller
         $endDate = $requestedData->endDate;
 
         $reportData = DB::select('call transaction_report_by_terminal(?,?,?)',array($terminalId,$startDate,$endDate));
+
+        // $reportData = DB::select("select
+        // max(draw_time) as draw_time
+        // ,max(ticket_taken_time) as ticket_taken_time
+        // ,barcode_number
+        // ,max(draw_master_id) as draw_master_id
+        // ,sum(game_value) as quantity
+        // ,0 as prize_value
+        // ,sum(game_value*mrp) as amount
+        // ,'' as particulars
+        // ,max(is_claimed) as is_claimed
+        // from (select max(play_masters.barcode_number) as barcode_number
+        // , max(play_masters.terminal_id) as terminal_id
+        // , max(play_details.play_series_id) as play_series_id
+        // ,max(play_series.mrp) as mrp
+        // , max(play_masters.draw_master_id) as draw_master_id
+        // ,max(play_masters.is_claimed) as is_claimed
+        // , max(play_details.input_value) as game_value
+        // , max(draw_masters.start_time) as start_time
+        // , max(draw_masters.end_time) as draw_time
+        // ,TIME_FORMAT(convert_tz(play_masters.created_at,@@session.time_zone,'+05:30'), '%h:%i:%s')
+        // as ticket_taken_time
+        // from play_details
+        // inner join
+        // (select * from play_masters where terminal_id=? and date(created_at)=? order by
+        // time(created_at) desc) play_masters ON play_masters.id = play_details.play_master_id
+        // inner join draw_masters ON draw_masters.id = play_masters.draw_master_id
+        // inner join play_series ON play_series.id = play_details.play_series_id
+        // group by play_details.play_master_id,play_details.play_series_id
+        // order by time(play_masters.created_at) desc) as table1
+        // order by draw_master_id,ticket_taken_time desc;",[$terminalId,$startDate]);
         echo json_encode($reportData,JSON_NUMERIC_CHECK);
     }
 
@@ -208,6 +250,24 @@ class RechargeToTerminalController extends Controller
         $terminalId = $requestedData->terminalId;
 
         $reportData = DB::select('call terminal_sale_report(?,?,?)',array($startDate,$endDate,$terminalId));
+
+        // get_prize_value_of_barcode(barcode_number)
+
+        //  $reportData = DB::select("select date(created_at) as game_date,terminal,agent_name,sum(total_sale) as total_sale,sum(prize) as prize,sum(terminal_commission_on_sale) as terminal_commission_on_sale
+        //     ,sum(total_sale)-sum(prize)-sum(terminal_commission_on_sale) as net_to_pay
+        //     from
+        //     (select terminal,agent_name,barcode_number,sum(input_value*mrp) as total_sale,0 as prize,
+        //     terminal_id,created_at,max(terminal_commission) as terminal_commission,sum(input_value*mrp)*(max(terminal_commission)/100) as terminal_commission_on_sale from
+        //     (select play_masters.barcode_number, play_masters.is_claimed,
+        //     play_masters.terminal_id,people.user_id as terminal,people.people_name as agent_name, play_masters.created_at, play_details.play_series_id,
+        //     play_details.input_value,play_series.mrp,play_masters.terminal_commission from play_masters
+        //     inner join play_details on play_masters.id = play_details.play_master_id
+        //     inner join play_series on play_details.play_series_id = play_series.id
+        //     inner join people on play_masters.terminal_id = people.id
+        //     where date(play_masters.created_at) between ? and ? AND play_masters.terminal_id=?) as table1
+        //     group by barcode_number,terminal_id,terminal,agent_name,created_at) as table2
+        //     group by date(created_at),terminal,terminal_id,agent_name;",[$startDate,$endDate,$terminalId]);
+
         echo json_encode($reportData,JSON_NUMERIC_CHECK);
     }
     public function terminalDateWiseReportFromCPanel(request $request){
@@ -246,4 +306,5 @@ class RechargeToTerminalController extends Controller
 
         return response()->json(['data'=> $data], 200);
     }
+
 }

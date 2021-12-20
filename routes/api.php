@@ -16,7 +16,11 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-
+Route::group(array('prefix' => 'dev'), function() {
+    Route::post('/getPointWiseBarcodeReport','RechargeToTerminalController@getPointWiseBarcodeReport');
+    Route::get('/getAllStockists','StockistController@getAllStockists');
+    Route::post('/getSaleReportByTerminalId','RechargeToTerminalController@getSaleReportByTerminalId');
+});
 Route::group(array('prefix' => 'v1'), function() {
 
     Route::post('/login','PersonController@validateCredential');
@@ -30,8 +34,11 @@ Route::group(array('prefix' => 'v1'), function() {
     Route::get('/getAllDrawTimes','DrawMasterController@getAllDrawTimes');
     Route::get('/getMessage','GameMessageController@getSiteNotification');
     Route::post('/generateNewResultAndDraw','CentralFunctionController@createNewResult');
+
+
     //testing
     Route::post('/newTest1','CentralFunctionController@newTest1');
+
 
     Route::get('/getNextDrawNumber','NextGameDrawController@getIncreasedValue');
     Route::get('/getPreviousResult','ResultDetailsController@getPreviousDrawResult');

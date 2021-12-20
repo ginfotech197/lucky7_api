@@ -29,6 +29,8 @@ class CreateResultMastersTable extends Migration
             $table->integer('dice_combination_id');
             $table->string('payout_status');
 
+            $table->unique(['draw_master_id', 'game_date']);
+
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

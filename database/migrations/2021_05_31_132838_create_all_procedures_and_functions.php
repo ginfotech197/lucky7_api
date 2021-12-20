@@ -132,23 +132,25 @@ class CreateAllProceduresAndFunctions extends Migration
             READS SQL DATA
             DETERMINISTIC
             BEGIN
-              SET @prize_value=0;
-              SET @total_prize_value=0;
-              SET @target_row=\'\';
-              select max(play_masters.draw_master_id),date(max(play_masters.created_at)) into @draw_id, @draw_date
-              from play_details
-              inner join (select * from play_masters where barcode_number=barcode)as play_masters ON play_masters.id = play_details.play_master_id
-              inner join play_series ON play_series.id = play_details.play_series_id;
-              select play_series_id into @target_row from result_masters where game_date=@draw_date and draw_master_id=@draw_id;
-              select (play_details.input_value * play_series.winning_price) into @prize_value from play_details
-              inner join play_series ON play_series.id = play_details.play_series_id
-              inner join play_masters ON play_masters.id = play_details.play_master_id
-              where barcode_number= barcode AND play_details.play_series_id=@target_row;
-                IF @prize_value IS NULL THEN
-                    SET @prize_value = 0;
-              END IF;
-              RETURN @prize_value;
-            END ;;
+            SET @prize_value=0;
+            SET @total_prize_value=0;
+            SET @target_row=\'\';
+            select max(play_masters.draw_master_id),date(max(play_masters.created_at)) into @draw_id, @draw_date
+            from play_details
+            inner join (select * from play_masters where barcode_number=barcode)as play_masters ON play_masters.id = play_details.play_master_id
+            inner join play_series ON play_series.id = play_details.play_series_id;
+
+            select play_series_id into @target_row from result_masters where game_date=@draw_date and draw_master_id=@draw_id;
+
+            select (play_details.input_value * play_series.winning_price) into @prize_value from play_details
+            inner join play_series ON play_series.id = play_details.play_series_id
+            inner join play_masters ON play_masters.id = play_details.play_master_id
+            where barcode_number= barcode AND play_details.play_series_id=@target_row;
+              IF @prize_value IS NULL THEN
+                  SET @prize_value = 0;
+            END IF;
+            RETURN @prize_value;
+            END ;
         ');
 
         DB::unprepared('DROP FUNCTION IF EXISTS get_total_prize_value_by_date;
@@ -305,8 +307,8 @@ class CreateAllProceduresAndFunctions extends Migration
             inner join play_series ON play_series.id = play_details.play_series_id
             group by play_details.play_master_id,play_details.play_series_id
             order by time(play_masters.created_at) desc) as table1
-            group by barcode_number order by draw_master_id,ticket_taken_time desc;
-            END ;;
+            order by draw_master_id,ticket_taken_time desc;
+            END ;
         ');
 
 
